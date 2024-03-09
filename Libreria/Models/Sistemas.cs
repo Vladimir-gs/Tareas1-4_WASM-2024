@@ -4,6 +4,7 @@ namespace Libreria.Models;
 
 public class Sistemas
 {
+    [Key]
     public int SistemaId { get; set; }
 
     [Required(ErrorMessage = "Campo Obligatorio")]
