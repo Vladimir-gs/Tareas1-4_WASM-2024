@@ -1,0 +1,57 @@
+﻿@inject HttpClient httpClient
+@page "/PrioridadCreate"
+
+<EditForm Model="prioridad" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h3>Registro de Prioridades</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <label>Descripci&oacute;n:</label>
+                    <InputText @bind-Value="prioridad.Descripcion" class="form-control"></InputText>
+                    <ValidationMessage For="(() => prioridad.Descripcion)" />
+                </div>
+                <div class="col-6">
+                    <label>Dias Compromiso:</label>
+                    <InputNumber @bind-Value="prioridad.DiasCompromiso" class="form-control"></InputNumber>
+                    <ValidationMessage For="(() => prioridad.DiasCompromiso)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="PrioridadIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+            <button type="button" class="btn btn-outline-primary bi bi-file-earmark-plus" @onclick="Nuevo"> Nuevo</button>
+            <button type="submit" class="btn btn-outline-success bi bi-floppy"> Guardar</button>
+        </div>
+    </div>
+</EditForm>
+@code {
+    public Prioridades prioridad = new Prioridades();
+
+    public void Nuevo()
+    {
+        prioridad = new Prioridades();
+    }
+
+    public async Task Guardar()
+    {
+        var guardado = await httpClient.PostAsJsonAsync("api/Prioridades", this.prioridad);
+        if (guardado.IsSuccessStatusCode)
+        {
+            Nuevo();
+        }
+        
+    }
+
+    public async Task<bool> Validar()
+    {
+        var prioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("Prioridades"))!;
+
+        return prioridades.Any(p => p.Descripcion!.ToLower() == prioridad.Descripcion!.ToLower()
+                                    && p.PrioridadId != prioridad.PrioridadId);
+    }
+}

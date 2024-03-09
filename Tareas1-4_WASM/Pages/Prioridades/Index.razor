@@ -1,0 +1,88 @@
+﻿@page "/PrioridadIndex"
+@inject HttpClient httpClient
+
+<div class="card shadow">
+    <div class="card-header">
+        <h3>Prioridades</h3>
+    </div>
+
+    <div class="card-body">
+        <form>
+            <div class="input-group aling-items-end">
+                <InputSelect class="form-select col-2" @bind-Value="op">
+                    <option value="1">Accesorios Id</option>
+                </InputSelect>
+
+                <div class="flex-fill mx-2">
+                    <div class="input-group">
+                        <label class="input-group-text">B&uacute;squeda</label>
+
+                        <div class="col-auto">
+                            @switch (op)
+                            {
+                                case 1:
+                                    <div class="input-group">
+                                        <InputNumber @bind-Value="prioridad.PrioridadId" class="form-control"></InputNumber>
+                                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                                    </div>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                </div>
+                <a href="/PrioridadCreate" class="btn btn-success mx-2 bi bi-plus-square"> Crear</a>
+
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <table class="table table-light table-hover table-striped table-bordered ">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Id</th>
+                    <th scope="col" class="text-center">Descripci&oacute;n</th>
+                    <th scope="col" class="text-center">Dias Compromiso</th>
+                    <th scope="col" class="text-center">Editar</th>
+                    <th scope="col" class="text-center">Detalles</th>
+                    <th scope="col" class="text-center">Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListaPrioridades)
+                {
+                    <tr>
+                        <td class="text-center">@item.PrioridadId</td>
+                        <td class="text-center">@item.Descripcion</td>
+                        <td class="text-center">@item.DiasCompromiso</td>
+                        <td class="text-center"><a href="PrioridadEdit/@item.PrioridadId" class="btn btn-outline-danger bi bi-pencil-square"></a></td>
+                        <td class="text-center"><a href="PrioridadView/@item.PrioridadId" class="btn btn-outline-primary bi bi-card-text"></a></td>
+                        <td class="text-center"><a href="PrioridadDelete/@item.PrioridadId" class="btn btn-outline-danger bi bi-person-x"></a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="card-footer fw-bold">
+            <p>Cantidad de Prioridades: @ListaPrioridades.Count</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Prioridades> ListaPrioridades = new List<Prioridades>();
+    public Prioridades prioridad = new Prioridades();
+    public int op { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("api/Prioridades"))!;
+    }
+    public async Task Buscar()
+    {
+        if (op == 1 && prioridad.PrioridadId > 0)
+            ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>($"api/Prioridades/"))!.Where(t => t.PrioridadId == prioridad.PrioridadId).ToList();
+        else
+            ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("api/Prioridades"))!;
+    }
+}

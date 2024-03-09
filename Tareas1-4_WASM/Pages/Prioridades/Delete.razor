@@ -1,0 +1,51 @@
+﻿@page "/PrioridadDelete";
+@page "/PrioridadDelete/{PrioridadId:int}";
+@inject HttpClient httpClient
+
+<PageTitle>Eliminar Prioridad</PageTitle>
+
+<div class="card shadow">
+    <div class="card-header">
+        <h4>Eliminar Prioridad</h4>
+    </div>
+    
+    <div class="card-body">
+        <div class="row">
+            <p><strong>-ID:</strong> @prioridad.PrioridadId</p>
+            <p><strong>-Descripci&oacute;n:</strong> @prioridad.Descripcion</p>
+            <p><strong>-Dias Compromiso: </strong> @prioridad.DiasCompromiso</p>
+        </div>
+    </div>
+    
+    <div class="card-footer d-flex justify-content-end">
+        <a href="PrioridadIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+        <button type="button" class="btn btn-danger bi bi-trash-fill" @onclick="Eliminar">Eliminar</button>
+    </div>
+</div>
+@code {
+
+    [Parameter]
+    public int PrioridadId { get; set; }
+    public Prioridades prioridad = new Prioridades();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (PrioridadId > 0)
+        {
+            var prioridadEncontrada = await httpClient.GetFromJsonAsync<Prioridades>($"api/Prioridades/{PrioridadId}");
+            if (prioridadEncontrada != null)
+            {
+                prioridad = prioridadEncontrada;
+            }
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        var eliminado = await httpClient.DeleteAsync($"api/Prioridades/{prioridad.PrioridadId}");
+        if (eliminado.IsSuccessStatusCode)
+        {
+            prioridad = new Prioridades();
+        }
+    }
+}

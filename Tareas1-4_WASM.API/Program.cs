@@ -22,11 +22,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(op => op
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
-
+app.UseCors(Op =>
+{
+    Op.AllowAnyOrigin();
+    Op.AllowAnyHeader();
+    Op.AllowAnyMethod();
+});
 
 app.UseHttpsRedirection();
 

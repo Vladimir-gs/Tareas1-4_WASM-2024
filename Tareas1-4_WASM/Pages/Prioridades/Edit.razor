@@ -1,0 +1,74 @@
+﻿@inject HttpClient httpClient
+@page "/PrioridadEdit";
+@page "/PrioridadEdit/{PrioridadId:int}";
+
+
+<EditForm Model="prioridad" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h3>Registro de Prioridades</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <label>Descripci&oacute;n:</label>
+                    <InputText @bind-Value="prioridad.Descripcion" class="form-control"></InputText>
+                    <ValidationMessage For="(() => prioridad.Descripcion)" />
+                </div>
+                <div class="col-6">
+                    <label>Dias Compromiso:</label>
+                    <InputNumber @bind-Value="prioridad.DiasCompromiso" class="form-control"></InputNumber>
+                    <ValidationMessage For="(() => prioridad.DiasCompromiso)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="PrioridadIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+            <button type="submit" class="btn btn-outline-success bi bi-floppy"> Guardar</button>
+        </div>
+
+        @if (cambiosGuardados)
+        {
+            <div class="alert alert-success" role="alert">
+                Cambios guardados
+            </div>
+        }
+    </div>
+</EditForm>
+@code {
+    [Parameter]
+    public int PrioridadId { get; set; }
+    public Prioridades prioridad = new Prioridades();
+    public bool cambiosGuardados { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (PrioridadId > 0)
+        {
+            var prioridadEncontrada = await httpClient.GetFromJsonAsync<Prioridades>($"api/Prioridades/{PrioridadId}");
+            if (prioridadEncontrada != null)
+            {
+                prioridad = prioridadEncontrada;
+            }
+        }
+    }
+
+    public async Task Guardar()
+    {
+        var guardado = await httpClient.PutAsJsonAsync($"api/Prioridades/{prioridad.PrioridadId}", prioridad);
+        if (guardado.IsSuccessStatusCode)
+        {
+            cambiosGuardados = true;
+        }
+    }
+
+    public async Task<bool> Validar()
+    {
+        var prioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("Prioridades"))!;
+
+        return prioridades.Any(p => p.Descripcion!.ToLower() == prioridad.Descripcion!.ToLower()
+                                    && p.PrioridadId != prioridad.PrioridadId);
+    }
+}
