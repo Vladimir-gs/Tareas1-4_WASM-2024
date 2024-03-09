@@ -1,0 +1,6 @@
+@Tareas1_4_WASM.API_HostAddress = http://localhost:5075
+
+GET {{Tareas1_4_WASM.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
