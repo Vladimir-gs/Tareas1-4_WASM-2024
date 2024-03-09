@@ -1,16 +1,16 @@
-﻿@page "/PrioridadIndex"
+﻿@page "/SistemaIndex"
 @inject HttpClient httpClient
 
 <div class="card shadow">
     <div class="card-header">
-        <h3>Prioridades</h3>
+        <h3>Sistemas</h3>
     </div>
 
     <div class="card-body">
         <form>
             <div class="input-group aling-items-end">
                 <InputSelect class="form-select col-2" @bind-Value="op">
-                    <option value="1">Prioridad Id</option>
+                    <option value="1">Sistemas Id</option>
                     <option value="2">Descripci&oacute;n</option>
                 </InputSelect>
 
@@ -23,13 +23,13 @@
                             {
                                 case 1:
                                     <div class="input-group">
-                                        <InputNumber @bind-Value="prioridad.PrioridadId" class="form-control"></InputNumber>
+                                        <InputNumber @bind-Value="sistema.SistemaId" class="form-control"></InputNumber>
                                         <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
                                     </div>
                                     break;
                                 case 2:
                                     <div class="input-group">
-                                        <InputText @bind-Value="prioridad.Descripcion" class="form-control"></InputText>
+                                        <InputText @bind-Value="sistema.DescripcionSistema" class="form-control"></InputText>
                                         <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
                                     </div>
                                     break;
@@ -37,7 +37,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="/PrioridadCreate" class="btn btn-success mx-2 bi bi-plus-square"> Crear</a>
+                <a href="/SistemaCreate" class="btn btn-success mx-2 bi bi-plus-square"> Crear</a>
 
             </div>
         </form>
@@ -48,50 +48,50 @@
             <thead>
                 <tr>
                     <th scope="col" class="text-center">Id</th>
+                    <th scope="col" class="text-center">Nombre del Sistema</th>
                     <th scope="col" class="text-center">Descripci&oacute;n</th>
-                    <th scope="col" class="text-center">Dias Compromiso</th>
                     <th scope="col" class="text-center">Editar</th>
                     <th scope="col" class="text-center">Detalles</th>
                     <th scope="col" class="text-center">Eliminar</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in ListaPrioridades)
+                @foreach (var item in ListaSistemas)
                 {
                     <tr>
-                        <td class="text-center">@item.PrioridadId</td>
-                        <td class="text-center">@item.Descripcion</td>
-                        <td class="text-center">@item.DiasCompromiso</td>
-                        <td class="text-center"><a href="PrioridadEdit/@item.PrioridadId" class="btn btn-outline-danger bi bi-pencil-square"></a></td>
-                        <td class="text-center"><a href="PrioridadView/@item.PrioridadId" class="btn btn-outline-primary bi bi-card-text"></a></td>
-                        <td class="text-center"><a href="PrioridadDelete/@item.PrioridadId" class="btn btn-outline-danger bi bi-person-x"></a></td>
+                        <td class="text-center">@item.SistemaId</td>
+                        <td class="text-center">@item.NombreSistema</td>
+                        <td class="text-center">@item.DescripcionSistema</td>
+                        <td class="text-center"><a href="SistemaEdit/@item.SistemaId" class="btn btn-outline-danger bi bi-pencil-square"></a></td>
+                        <td class="text-center"><a href="SistemaView/@item.SistemaId" class="btn btn-outline-primary bi bi-card-text"></a></td>
+                        <td class="text-center"><a href="SistemaDelete/@item.SistemaId" class="btn btn-outline-danger bi bi-person-x"></a></td>
                     </tr>
                 }
             </tbody>
         </table>
 
         <div class="card-footer fw-bold">
-            <p>Cantidad de Prioridades: @ListaPrioridades.Count</p>
+            <p>Cantidad de Sistemas: @ListaSistemas.Count</p>
         </div>
     </div>
 </div>
 
 @code {
-    public List<Prioridades> ListaPrioridades = new List<Prioridades>();
-    public Prioridades prioridad = new Prioridades();
+    public List<Sistemas> ListaSistemas = new List<Sistemas>();
+    public Sistemas sistema = new Sistemas();
     public int op { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("api/Prioridades"))!;
+        ListaSistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>("api/Sistemas"))!;
     }
     public async Task Buscar()
     {
-        if (op == 1 && prioridad.PrioridadId > 0)
-            ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>($"api/Prioridades/"))!.Where(t => t.PrioridadId == prioridad.PrioridadId).ToList();
-        else if (op == 2 && !string.IsNullOrEmpty(prioridad.Descripcion))
-            ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>($"api/Prioridades"))!.Where(p => p.Descripcion!.ToLower().Contains(prioridad.Descripcion.ToLower())).ToList();
+        if (op == 1 && sistema.SistemaId > 0)
+            ListaSistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>($"api/Sistemas/"))!.Where(t => t.SistemaId == sistema.SistemaId).ToList();
+        else if (op == 2 && !string.IsNullOrEmpty(sistema.DescripcionSistema))
+            ListaSistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>($"api/Sistemas"))!.Where(p => p.DescripcionSistema!.ToLower().Contains(sistema.DescripcionSistema.ToLower())).ToList();
         else
-            ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>($"api/Prioridades"))!;
+            ListaSistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>($"api/Sistemas"))!;
     }
 }

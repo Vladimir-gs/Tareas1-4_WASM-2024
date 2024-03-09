@@ -1,0 +1,73 @@
+﻿@inject HttpClient httpClient
+@page "/SistemaEdit";
+@page "/SistemaEdit/{SistemaId:int}";
+
+
+<EditForm Model="sistema" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h3>Editar Sistemas</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-6">
+                    <label>Nombre:</label>
+                    <InputText @bind-Value="sistema.NombreSistema" class="form-control"></InputText>
+                    <ValidationMessage For="(() => sistema.NombreSistema)" />
+                </div>
+                <div class="col-6">
+                    <label>Descripci&oacute;n:</label>
+                    <InputText @bind-Value="sistema.DescripcionSistema" class="form-control"></InputText>
+                    <ValidationMessage For="(() => sistema.DescripcionSistema)" />
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="SistemaIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+            <button type="submit" class="btn btn-outline-success bi bi-floppy"> Guardar</button>
+        </div>
+        @if (cambiosGuardados)
+        {
+            <div class="alert alert-success" role="alert">
+                Cambios guardados
+            </div>
+        }
+    </div>
+</EditForm>
+@code {
+    [Parameter]
+    public int SistemaId { get; set; }
+    public Sistemas sistema = new Sistemas();
+    public bool cambiosGuardados { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (SistemaId > 0)
+        {
+            var prioridadEncontrada = await httpClient.GetFromJsonAsync<Sistemas>($"api/Sistemas/{SistemaId}");
+            if (prioridadEncontrada != null)
+            {
+                sistema = prioridadEncontrada;
+            }
+        }
+    }
+    public async Task Guardar()
+    {
+        var guardado = await httpClient.PutAsJsonAsync($"api/Sistemas/{sistema.SistemaId}", sistema);
+        if (guardado.IsSuccessStatusCode)
+        {
+            cambiosGuardados = true;
+        }
+
+    }
+
+    public async Task<bool> Validar()
+    {
+        var sistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>("Sistemas"))!;
+
+        return sistemas.Any(p => p.DescripcionSistema!.ToLower() == sistema.DescripcionSistema!.ToLower()
+                                    && p.SistemaId != sistema.SistemaId);
+    }
+}

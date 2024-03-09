@@ -1,0 +1,49 @@
+﻿@page "/SistemaDelete";
+@page "/SistemaDelete/{SistemaId:int}";
+@inject HttpClient httpClient
+
+<div class="card shadow">
+    <div class="card-header">
+        <h4>Eliminar Sistema</h4>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <p><strong>-ID:</strong> @sistema.SistemaId</p>
+            <p><strong>-Nombre:</strong> @sistema.NombreSistema</p>
+            <p><strong>-Descripci&oacute;n: </strong> @sistema.DescripcionSistema</p>
+        </div>
+    </div>
+
+    <div class="card-footer d-flex justify-content-end">
+        <a href="SistemaIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+        <button type="button" class="btn btn-danger bi bi-trash-fill" @onclick="Eliminar">Eliminar</button>
+    </div>
+</div>
+@code {
+
+    [Parameter]
+    public int SistemaId { get; set; }
+    public Sistemas sistema = new Sistemas();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (SistemaId > 0)
+        {
+            var prioridadEncontrada = await httpClient.GetFromJsonAsync<Sistemas>($"api/Sistemas/{SistemaId}");
+            if (prioridadEncontrada != null)
+            {
+                sistema = prioridadEncontrada;
+            }
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        var eliminado = await httpClient.DeleteAsync($"api/Sistemas/{sistema.SistemaId}");
+        if (eliminado.IsSuccessStatusCode)
+        {
+            sistema = new Sistemas();
+        }
+    }
+}
