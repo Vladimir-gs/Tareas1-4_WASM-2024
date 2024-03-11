@@ -1,0 +1,54 @@
+﻿@page "/TicketDelete";
+@page "/TicketDelete/{TicketId:int}";
+@inject HttpClient httpClient
+
+<div class="card shadow">
+    <div class="card-header">
+        <h4>Eliminar Ticket</h4>
+    </div>
+    
+    <div class="card-body">
+        <div class="row">
+            <p><strong>- ID:</strong> @ticket.TicketId</p>
+            <p><strong>- CLiente:</strong> @ticket.ClienteId</p>
+            <p><strong>- Prioridad: </strong> @ticket.PrioridadId</p>
+            <p><strong>- Sistema: </strong> @ticket.SistemaId</p>
+            <p><strong>- Fecha: </strong> @ticket.Fecha.ToString("dd/MM/yyyy")</p>
+            <p><strong>- Asunto: </strong> @ticket.Asunto</p>
+            <p><strong>- Solicitado por:: </strong> @ticket.Solicitadopor</p>
+            <p><strong>- Direcci&oacute;n: </strong> @ticket.Descripcion</p>
+        </div>
+    </div>
+    
+    <div class="card-footer d-flex justify-content-end">
+        <a href="TicketIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+        <button type="button" class="btn btn-danger bi bi-trash-fill" @onclick="Eliminar">Eliminar</button>
+    </div>
+</div>
+@code {
+
+    [Parameter]
+    public int TicketId { get; set; }
+    public Tickets ticket = new Tickets();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (TicketId > 0)
+        {
+            var clienteEncontrado = await httpClient.GetFromJsonAsync<Tickets>($"api/Tickets/{TicketId}");
+            if (clienteEncontrado != null)
+            {
+                ticket = clienteEncontrado;
+            }
+        }
+    }
+
+    public async Task Eliminar()
+    {
+        var eliminado = await httpClient.DeleteAsync($"api/Tickets/{ticket.TicketId}");
+        if (eliminado.IsSuccessStatusCode)
+        {
+            ticket = new Tickets();
+        }
+    }
+}

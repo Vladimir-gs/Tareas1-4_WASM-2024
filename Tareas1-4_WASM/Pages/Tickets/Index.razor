@@ -1,0 +1,129 @@
+﻿@page "/TicketIndex"
+@inject HttpClient httpClient
+
+<div class="card shadow">
+    <div class="card-header">
+        <h3>Tickets</h3>
+    </div>
+
+    <div class="card-body">
+        <form>
+            <div class="input-group aling-items-end">
+                <InputSelect class="form-select col-2" @bind-Value="Opcion">
+                    <option value="1">Cliente Id</option>
+                    <option value="2">Asunto</option>
+                </InputSelect>
+
+                <div class="flex-fill mx-2">
+                    <div class="input-group">
+                        <label class="input-group-text">B&uacute;squeda</label>
+
+                        <div class="col-auto">
+                            @switch (Opcion)
+                            {
+                                case 1:
+                                    <div class="input-group">
+                                        <InputNumber @bind-Value="ticket.ClienteId" class="form-control"></InputNumber>
+                                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                                    </div>
+                                    break;
+                                case 2:
+                                    <div class="input-group">
+                                        <InputText @bind-Value="ticket.Asunto" class="form-control"></InputText>
+                                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                                    </div>
+                                    break;
+                        }
+                        </div>
+                    </div>
+                </div>
+                <a href="/TicketCreate" class="btn btn-success mx-2 bi bi-plus-square"> Crear</a>
+
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <table class="table table-light table-hover table-striped table-bordered ">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Id</th>
+                    <th scope="col" class="text-center">Asunto</th>
+                    <th scope="col" class="text-center">Fecha</th>
+                    <th scope="col" class="text-center">Prioridad</th>
+                    <th scope="col" class="text-center">Cliente</th>
+                    <th scope="col" class="text-center">Sistema</th>
+                    <th scope="col" class="text-center">Editar</th>
+                    <th scope="col" class="text-center">Detalles</th>
+                    <th scope="col" class="text-center">Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListaTickets)
+                {
+                    <tr>
+                        <td class="text-center">@item.TicketId</td>
+                        <td class="text-center">@item.Asunto</td>
+                        <td class="text-center">@item.Fecha.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center">@ObtenerDescripcionPrioridad(item.PrioridadId)</td>
+                        <td class="text-center">@ObtenerNombreCliente(item.ClienteId)</td>
+                        <td class="text-center">@ObtenerNombreSistema(item.SistemaId)</td>
+                        <td class="text-center"><a href="TicketEdit/@item.TicketId" class="btn btn-outline-danger bi bi-pencil-square"></a></td>
+                        <td class="text-center"><a href="TicketView/@item.TicketId" class="btn btn-outline-primary bi bi-card-text"></a></td>
+                        <td class="text-center"><a href="TicketDelete/@item.TicketId" class="btn btn-outline-danger bi bi-person-x"></a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="card-footer fw-bold">
+            <p>Cantidad de Tickets: @ListaTickets.Count</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Tickets> ListaTickets = new List<Tickets>();
+    public List<Clientes> ListaClientes { get; set; } = new List<Clientes>();
+    public List<Prioridades> ListaPrioridades { get; set; } = new List<Prioridades>();
+    public List<Sistemas> ListaSistemas { get; set; } = new List<Sistemas>();
+    public Tickets ticket = new Tickets();
+    public Prioridades prioridad = new Prioridades();
+    public int Opcion { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaTickets = (await httpClient.GetFromJsonAsync<List<Tickets>>("api/Tickets"))!;
+        ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!;
+        ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("api/Prioridades"))!;
+        ListaSistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>("api/Sistemas"))!;
+    }
+
+    public async Task Buscar()
+    {
+        if (Opcion == 1 && ticket.TicketId > 0)
+            ListaTickets = (await httpClient.GetFromJsonAsync<List<Tickets>>("api/Tickets"))!.Where(t => t.TicketId == ticket.TicketId).ToList();
+
+        else if (Opcion == 2 && !string.IsNullOrEmpty(ticket.Asunto))
+            ListaTickets = (await httpClient.GetFromJsonAsync<List<Tickets>>("api/Tickets"))!.Where(t => t.Asunto!.ToLower().Contains(ticket.Asunto!.ToLower())).ToList();
+        else
+            ListaTickets = (await httpClient.GetFromJsonAsync<List<Tickets>>("api/Tickets"))!;
+    }
+
+    public string ObtenerDescripcionPrioridad(int prioridadId)
+    {
+        var prioridad = ListaPrioridades.FirstOrDefault(p => p.PrioridadId == prioridadId);
+        return prioridad != null ? prioridad.Descripcion : string.Empty;
+    }
+    public string ObtenerNombreCliente(int clienteId)
+    {
+        var cliente = ListaClientes.FirstOrDefault(c => c.ClienteId == clienteId);
+        return cliente != null ? cliente.Nombre : string.Empty;
+    }
+
+    public string ObtenerNombreSistema(int sistemaId)
+    {
+        var sistema = ListaSistemas.FirstOrDefault(s => s.SistemaId == sistemaId);
+        return sistema != null ? sistema.NombreSistema : string.Empty;
+    }
+}

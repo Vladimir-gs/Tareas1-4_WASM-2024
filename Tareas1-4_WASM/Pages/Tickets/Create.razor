@@ -1,0 +1,106 @@
+﻿@inject HttpClient httpClient
+@page "/TicketCreate"
+
+<EditForm Model="ticket" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h3>Registro de Ticket</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col col-4">
+                    <label>Prioridad: </label>
+                    <InputSelect @bind-Value="ticket.PrioridadId" class="form-select">
+                        @foreach (var prioridad in ListaPrioridades)
+                        {
+                            <option value="@prioridad.PrioridadId">@prioridad.Descripcion</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => ticket.PrioridadId)" />
+                </div>
+                <div class="col col-4">
+                    <label>Cliente: </label>
+                    <InputSelect @bind-Value="ticket.ClienteId" class="form-select">
+                        @foreach (var cliente in ListaClientes)
+                        {
+                            <option value="@cliente.ClienteId">@cliente.Nombre</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => ticket.ClienteId)" />
+                </div>
+                <div class="col col-4">
+                    <label>Sistema: </label>
+                    <InputSelect @bind-Value="ticket.SistemaId" class="form-select">
+                        @foreach (var sistema in ListaSistemas)
+                        {
+                            <option value="@sistema.SistemaId">@sistema.DescripcionSistema</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => ticket.SistemaId)" />
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label> Fecha:</label>
+                    <InputDate @bind-Value="ticket.Fecha" class="form-control"></InputDate>
+                    <ValidationMessage For="@(() => ticket.Fecha)" />
+                </div>
+                <div class="col-6">
+                    <label> Asunto:</label>
+                    <InputText @bind-Value="ticket.Asunto" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => ticket.Asunto)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <label> Solicitado por:</label>
+                    <InputText @bind-Value="ticket.Solicitadopor" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => ticket.Solicitadopor)" />
+                </div>
+                <div class="col-6">
+                    <label> Descripci&oacute;n:</label>
+                    <InputText @bind-Value="ticket.Descripcion" class="form-control"></InputText>
+                    <ValidationMessage For="@(() => ticket.Descripcion)" />
+                </div>
+            </div>   
+        </div>
+        <div class="card-footer">
+            <a href="TicketIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+            <button type="button" class="btn btn-outline-primary bi bi-file-earmark-plus" @onclick="Nuevo"> Nuevo</button>
+            <button type="submit" class="btn btn-outline-success bi bi-floppy"> Guardar</button>
+        </div>
+    </div>
+</EditForm>
+@code {
+    public Tickets ticket = new Tickets();
+    public List<Clientes> ListaClientes { get; set; } = new List<Clientes>();
+    public List<Prioridades> ListaPrioridades { get; set; } = new List<Prioridades>();
+    public List<Sistemas> ListaSistemas { get; set; } = new List<Sistemas>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!;
+        ListaPrioridades = (await httpClient.GetFromJsonAsync<List<Prioridades>>("api/Prioridades"))!;
+        ListaSistemas = (await httpClient.GetFromJsonAsync<List<Sistemas>>("api/Sistemas"))!;
+        ticket.Fecha = DateTime.Today;
+        Nuevo();
+    }
+
+    public void Nuevo()
+    {
+        ticket = new Tickets();
+        ticket.Fecha = DateTime.Today;
+    }
+
+    public async Task Guardar()
+    {
+        var guardado = await httpClient.PostAsJsonAsync("api/Tickets", this.ticket);
+        if (guardado.IsSuccessStatusCode)
+        {
+            Nuevo();
+        }
+    }
+}
