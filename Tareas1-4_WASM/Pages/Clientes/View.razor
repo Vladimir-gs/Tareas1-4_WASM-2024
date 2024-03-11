@@ -1,0 +1,43 @@
+﻿@page "/ClienteView";
+@page "/ClienteView/{ClienteId:int}";
+@inject HttpClient httpClient
+
+<div class="card shadow">
+    <div class="card-header">
+        <h4>Detalles...</h4>
+    </div>
+    
+    <div class="card-body">
+        <div class="row">
+            <p><strong>- ID:</strong> @cliente.ClienteId</p>
+            <p><strong>- Nombre:</strong> @cliente.Nombre</p>
+            <p><strong>- Tel&eacute;fono: </strong> @cliente.Telefono</p>
+            <p><strong>- Celular: </strong> @cliente.Celular</p>
+            <p><strong>- RNC: </strong> @cliente.RNC</p>
+            <p><strong>- Email: </strong> @cliente.Email</p>
+            <p><strong>- Direcci&oacute;n: </strong> @cliente.Direccion</p>
+        </div>
+    </div>
+    
+    <div class="card-footer d-flex justify-content-end">
+        <a href="ClienteIndex" class="btn btn-outline-danger bi bi-box-arrow-left"> Volver</a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ClienteId { get; set; }
+    public Clientes cliente = new Clientes();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ClienteId > 0)
+        {
+            var clienteEncontrado = await httpClient.GetFromJsonAsync<Clientes>($"api/Clientes/{ClienteId}");
+            if (clienteEncontrado != null)
+            {
+                cliente = clienteEncontrado;
+            }
+        }
+    }
+}

@@ -1,0 +1,111 @@
+﻿@page "/ClienteIndex"
+@inject HttpClient httpClient
+
+<div class="card shadow">
+    <div class="card-header">
+        <h3>Clientes</h3>
+    </div>
+
+    <div class="card-body">
+        <form>
+            <div class="input-group aling-items-end">
+                <InputSelect class="form-select col-2" @bind-Value="Opcion">
+                    <option value="1">Cliente Id</option>
+                    <option value="2">RNC</option>
+                    <option value="2">Nombre</option>
+                </InputSelect>
+
+                <div class="flex-fill mx-2">
+                    <div class="input-group">
+                        <label class="input-group-text">B&uacute;squeda</label>
+
+                        <div class="col-auto">
+                            @switch (Opcion)
+                            {
+                                case 1:
+                                    <div class="input-group">
+                                        <InputNumber @bind-Value="cliente.ClienteId" class="form-control"></InputNumber>
+                                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                                    </div>
+                                    break;
+                                case 2:
+                                    <div class="input-group">
+                                        <InputText @bind-Value="cliente.RNC" class="form-control"></InputText>
+                                        <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                                    </div>
+                                    break;
+                                case 3:
+                                <div class="input-group">
+                                    <InputText @bind-Value="cliente.Nombre" class="form-control"></InputText>
+                                    <button type="button" class="btn btn-primary bi bi-search" @onclick="Buscar"></button>
+                                </div>
+                                break;
+                        }
+                        </div>
+                    </div>
+                </div>
+                <a href="/ClienteCreate" class="btn btn-success mx-2 bi bi-plus-square"> Crear</a>
+
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <table class="table table-light table-hover table-striped table-bordered ">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">Id</th>
+                    <th scope="col" class="text-center">Nombre</th>
+                    <th scope="col" class="text-center">Celular</th>
+                    <th scope="col" class="text-center">RNC</th>
+                    <th scope="col" class="text-center">Email</th>
+                    <th scope="col" class="text-center">Editar</th>
+                    <th scope="col" class="text-center">Detalles</th>
+                    <th scope="col" class="text-center">Eliminar</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ListaClientes)
+                {
+                    <tr>
+                        <td class="text-center">@item.ClienteId</td>
+                        <td class="text-center">@item.Nombre</td>
+                        <td class="text-center">@item.Celular</td>
+                        <td class="text-center">@item.RNC</td>
+                        <td class="text-center">@item.Email</td>
+                        <td class="text-center"><a href="ClienteEdit/@item.ClienteId" class="btn btn-outline-danger bi bi-pencil-square"></a></td>
+                        <td class="text-center"><a href="ClienteView/@item.ClienteId" class="btn btn-outline-primary bi bi-card-text"></a></td>
+                        <td class="text-center"><a href="ClienteDelete/@item.ClienteId" class="btn btn-outline-danger bi bi-person-x"></a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="card-footer fw-bold">
+            <p>Cantidad de Clientes: @ListaClientes.Count</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    public List<Clientes> ListaClientes = new List<Clientes>();
+    public Clientes cliente = new Clientes();
+    public int Opcion { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!;
+    }
+    public async Task Buscar()
+    {
+        if (Opcion == 1 && cliente.ClienteId > 0)
+            ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!.Where(c => c.ClienteId == cliente.ClienteId).ToList();
+        else if (Opcion == 2 && !string.IsNullOrEmpty(cliente.RNC))
+            ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!.Where(c => c.RNC!.ToLower().Contains(cliente.RNC!.ToLower())).ToList();
+        else if (Opcion == 3 && !string.IsNullOrEmpty(cliente.Nombre))
+            ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!
+            .Where(c => c.Nombre!.ToLower().Contains(cliente.Nombre.ToLower())).ToList();
+        else
+            ListaClientes = (await httpClient.GetFromJsonAsync<List<Clientes>>("api/Clientes"))!;
+    }
+}
